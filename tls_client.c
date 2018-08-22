@@ -28,6 +28,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <bsd/bsd.h>
+
 #include <openssl/err.h>
 #include <openssl/x509.h>
 

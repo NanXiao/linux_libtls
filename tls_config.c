@@ -24,6 +24,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <bsd/bsd.h>
+
 #include <tls.h>
 
 #include "tls_internal.h"

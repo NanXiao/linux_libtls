@@ -126,15 +126,15 @@ tls_check_subject_altname(struct tls *ctx, X509 *cert, const char *name,
 			continue;
 
 		if (type == GEN_DNS) {
-			unsigned char	*data;
+			const unsigned char	*data;
 			int		 format, len;
 
 			format = ASN1_STRING_type(altname->d.dNSName);
 			if (format == V_ASN1_IA5STRING) {
-				data = ASN1_STRING_data(altname->d.dNSName);
+				data = ASN1_STRING_get0_data(altname->d.dNSName);
 				len = ASN1_STRING_length(altname->d.dNSName);
 
-				if (len < 0 || (size_t)len != strlen(data)) {
+				if (len < 0 || (size_t)len != strlen((const char*)data)) {
 					tls_set_errorx(ctx,
 					    "error verifying name '%s': "
 					    "NUL byte in subjectAltName, "
@@ -149,7 +149,7 @@ tls_check_subject_altname(struct tls *ctx, X509 *cert, const char *name,
 				 * " " is a legal domain name, but that
 				 * dNSName must be rejected.
 				 */
-				if (strcmp(data, " ") == 0) {
+				if (strcmp((const char*)data, " ") == 0) {
 					tls_set_errorx(ctx,
 					    "error verifying name '%s': "
 					    "a dNSName of \" \" must not be "
@@ -158,7 +158,7 @@ tls_check_subject_altname(struct tls *ctx, X509 *cert, const char *name,
 					break;
 				}
 
-				if (tls_match_name(data, name) == 0) {
+				if (tls_match_name((const char*)data, name) == 0) {
 					*alt_match = 1;
 					break;
 				}
@@ -171,11 +171,11 @@ tls_check_subject_altname(struct tls *ctx, X509 *cert, const char *name,
 			}
 
 		} else if (type == GEN_IPADD) {
-			unsigned char	*data;
+			const unsigned char	*data;
 			int		 datalen;
 
 			datalen = ASN1_STRING_length(altname->d.iPAddress);
-			data = ASN1_STRING_data(altname->d.iPAddress);
+			data = ASN1_STRING_get0_data(altname->d.iPAddress);
 
 			if (datalen < 0) {
 				tls_set_errorx(ctx,

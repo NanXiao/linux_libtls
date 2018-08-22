@@ -96,6 +96,7 @@ int
 tls_keypair_set_key_mem(struct tls_keypair *keypair, struct tls_error *error,
     const uint8_t *key, size_t len)
 {
+	error = error;
 	tls_keypair_clear_key(keypair);
 	return tls_set_mem(&keypair->key_mem, &keypair->key_len, key, len);
 }
@@ -112,6 +113,7 @@ int
 tls_keypair_set_ocsp_staple_mem(struct tls_keypair *keypair,
     struct tls_error *error, const uint8_t *staple, size_t len)
 {
+	error = error;
 	return tls_set_mem(&keypair->ocsp_staple, &keypair->ocsp_staple_len,
 	    staple, len);
 }

@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <bsd/bsd.h>
+
 #include "tls.h"
 #include "tls_internal.h"
 
@@ -127,6 +129,8 @@ int
 tls_password_cb(char *buf, int size, int rwflag, void *u)
 {
 	size_t len;
+
+	rwflag = rwflag;
 
 	if (size < 0)
 		return (0);
