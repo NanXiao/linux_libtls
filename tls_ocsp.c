@@ -17,6 +17,8 @@
 
 #include <sys/types.h>
 
+#include <string.h>
+
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
@@ -58,6 +60,7 @@ tls_ocsp_asn1_parse_time(struct tls *ctx, ASN1_GENERALIZEDTIME *gt, time_t *gt_t
 {
 	struct tm tm;
 
+	ctx = ctx;
 	if (gt == NULL)
 		return -1;
 	/* RFC 6960 specifies that all times in OCSP must be GENERALIZEDTIME */
@@ -300,6 +303,7 @@ tls_ocsp_verify_cb(SSL *ssl, void *arg)
 	const unsigned char *raw = NULL;
 	int size, res = -1;
 	struct tls *ctx;
+	arg = arg;
 
 	if ((ctx = SSL_get_app_data(ssl)) == NULL)
 		return -1;
@@ -333,6 +337,7 @@ tls_ocsp_stapling_cb(SSL *ssl, void *arg)
 	int ret = SSL_TLSEXT_ERR_ALERT_FATAL;
 	unsigned char *ocsp_staple = NULL;
 	struct tls *ctx;
+	arg = arg;
 
 	if ((ctx = SSL_get_app_data(ssl)) == NULL)
 		goto err;

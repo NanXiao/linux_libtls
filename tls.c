@@ -274,8 +274,10 @@ tls_configure(struct tls *ctx, struct tls_config *config)
 int
 tls_cert_hash(X509 *cert, char **hash)
 {
-	char d[EVP_MAX_MD_SIZE], *dhex = NULL;
-	int dlen, rv = -1;
+	unsigned char d[EVP_MAX_MD_SIZE];
+	char *dhex = NULL;
+	unsigned int dlen;
+	int rv = -1;
 
 	free(*hash);
 	*hash = NULL;
@@ -301,8 +303,10 @@ tls_cert_hash(X509 *cert, char **hash)
 int
 tls_cert_pubkey_hash(X509 *cert, char **hash)
 {
-	char d[EVP_MAX_MD_SIZE], *dhex = NULL;
-	int dlen, rv = -1;
+	unsigned char d[EVP_MAX_MD_SIZE];
+	char *dhex = NULL;
+	unsigned int dlen;
+	int rv = -1;
 
 	free(*hash);
 	*hash = NULL;
@@ -423,7 +427,8 @@ tls_configure_ssl(struct tls *ctx, SSL_CTX *ssl_ctx)
 		SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_TLSv1_2);
 
 	if (ctx->config->alpn != NULL) {
-		if (SSL_CTX_set_alpn_protos(ssl_ctx, ctx->config->alpn,
+		if (SSL_CTX_set_alpn_protos(ssl_ctx,
+		    (const unsigned char*)(ctx->config->alpn),
 		    ctx->config->alpn_len) != 0) {
 			tls_set_errorx(ctx, "failed to set alpn");
 			goto err;

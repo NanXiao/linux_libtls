@@ -14,10 +14,13 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <string.h>
 
 #include <sys/socket.h>
 
 #include <arpa/inet.h>
+
+#include <bsd/bsd.h>
 
 #include <openssl/ec.h>
 #include <openssl/err.h>
@@ -65,9 +68,11 @@ tls_server_alpn_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
     const unsigned char *in, unsigned int inlen, void *arg)
 {
 	struct tls *ctx = arg;
+	ssl = ssl;
 
 	if (SSL_select_next_proto((unsigned char**)out, outlen,
-	    ctx->config->alpn, ctx->config->alpn_len, in, inlen) ==
+	    (const unsigned char*)(ctx->config->alpn), ctx->config->alpn_len,
+	    in, inlen) ==
 	    OPENSSL_NPN_NEGOTIATED)
 		return (SSL_TLSEXT_ERR_OK);
 

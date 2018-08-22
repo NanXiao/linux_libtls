@@ -1,4 +1,4 @@
-CC ?= gcc # C compiler
+CC ?= clang # C compiler
 CFLAGS ?= -D_GNU_SOURCE -fPIC -Wall -Wextra -Wno-error -O2 -g -I./ # C flags
 LDFLAGS ?= -shared  # linking flags
 RM ?= rm -f  # rm command
