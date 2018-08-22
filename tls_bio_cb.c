@@ -30,19 +30,18 @@ static int bio_cb_read(BIO *bio, char *buf, int size);
 static int bio_cb_puts(BIO *bio, const char *str);
 static long bio_cb_ctrl(BIO *bio, int cmd, long num, void *ptr);
 
-static BIO_METHOD bio_cb_method = {
-	.type = BIO_TYPE_MEM,
-	.name = "libtls_callbacks",
-	.bwrite = bio_cb_write,
-	.bread = bio_cb_read,
-	.bputs = bio_cb_puts,
-	.ctrl = bio_cb_ctrl,
-};
-
 static BIO_METHOD *
 bio_s_cb(void)
 {
-	return (&bio_cb_method);
+	static BIO_METHOD *bio_cb_method = NULL;
+	if (!bio_cb_method) {
+		bio_cb_method = BIO_meth_new(BIO_TYPE_MEM, "libtls_callbacks");
+		BIO_meth_set_write(bio_cb_method, bio_cb_write);
+		BIO_meth_set_read(bio_cb_method, bio_cb_read);
+		BIO_meth_set_puts(bio_cb_method, bio_cb_puts);
+		BIO_meth_set_ctrl(bio_cb_method, bio_cb_ctrl);
+	}
+	return (bio_cb_method);
 }
 
 static int
@@ -58,10 +57,10 @@ bio_cb_ctrl(BIO *bio, int cmd, long num, void *ptr)
 
 	switch (cmd) {
 	case BIO_CTRL_GET_CLOSE:
-		ret = (long)bio->shutdown;
+		ret = (long)BIO_get_shutdown(bio);
 		break;
 	case BIO_CTRL_SET_CLOSE:
-		bio->shutdown = (int)num;
+		BIO_set_shutdown(bio, num);
 		break;
 	case BIO_CTRL_DUP:
 	case BIO_CTRL_FLUSH:
@@ -70,7 +69,7 @@ bio_cb_ctrl(BIO *bio, int cmd, long num, void *ptr)
 	case BIO_CTRL_GET:
 	case BIO_CTRL_SET:
 	default:
-		ret = BIO_ctrl(bio->next_bio, cmd, num, ptr);
+		ret = BIO_ctrl(BIO_next(bio), cmd, num, ptr);
 	}
 
 	return (ret);
@@ -79,7 +78,7 @@ bio_cb_ctrl(BIO *bio, int cmd, long num, void *ptr)
 static int
 bio_cb_write(BIO *bio, const char *buf, int num)
 {
-	struct tls *ctx = bio->ptr;
+	struct tls *ctx = BIO_get_data(bio);
 	int rv;
 
 	BIO_clear_retry_flags(bio);
@@ -97,7 +96,7 @@ bio_cb_write(BIO *bio, const char *buf, int num)
 static int
 bio_cb_read(BIO *bio, char *buf, int size)
 {
-	struct tls *ctx = bio->ptr;
+	struct tls *ctx = BIO_get_data(bio);
 	int rv;
 
 	BIO_clear_retry_flags(bio);
@@ -132,8 +131,8 @@ tls_set_cbs(struct tls *ctx, tls_read_cb read_cb, tls_write_cb write_cb,
 		tls_set_errorx(ctx, "failed to create callback i/o");
 		goto err;
 	}
-	bio->ptr = ctx;
-	bio->init = 1;
+	BIO_set_data(bio, ctx);
+	BIO_set_init(bio, 1);
 
 	SSL_set_bio(ctx->ssl_conn, bio, bio);
 
